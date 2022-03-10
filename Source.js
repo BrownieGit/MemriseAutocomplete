@@ -1,5 +1,5 @@
-function cl(a, b) { return (b == undefined ? document.getElementsByClassName(a) : document.getElementById(a).contentDocument.getElementsByClassName(b)); }
-function w(condition, onTrue, loop) {
+var cl = function(a, b) { return (b == undefined ? document.getElementsByClassName(a) : document.getElementById(a).contentDocument.getElementsByClassName(b)); };
+var w = function(condition, onTrue, loop) {
     var wait = setInterval(function() {
         if (condition()) {
             setTimeout(onTrue, 100);
@@ -7,14 +7,14 @@ function w(condition, onTrue, loop) {
                 clearInterval(wait);
             }
         }
-    }, 10)
-}
+    }, 10);
+};
 
 document.body.innerHTML += `<style>.prog{font-size:100px;margin-top:50px;}.frame{border:0;z-index:99999;position:fixed;top:35vh;left:5vw;width:45vw;height:60vh;} .acpopup {z-index:9999;background-color:white;font-size:17px;position:fixed;
     font-family:Monospace;border:solid lightgray 5px;padding:10px;}body.levels .levels .level:hover{background-color:lightblue;}</style><div class='acpopup selectp' 
     style='top:10px;left:10px;'>Select set to complete (click):</div>`;
 
-lvs = cl("level");
+var lvs = cl("level");
 for (e in lvs) {
     try {
         lvs[e].removeAttribute("href");
@@ -25,7 +25,7 @@ for (e in lvs) {
 
 console.log("Memrise Autocomplete By Brownie");
 
-function be(levelnum) {
+window.be = function(levelnum) {
 
     for (e in lvs) {
         try {
@@ -55,8 +55,7 @@ function be(levelnum) {
     ansloaded = false;
 
     w(function() {
-        if (cl("ansiframe", "text-text").length > 0) { return true; }
-        return false;
+        return (cl("ansiframe", "text-text").length > 0);
     }, function() {
         ansJson = {};
 
@@ -88,7 +87,7 @@ function be(levelnum) {
         console.log("Loaded answers:");
         console.log(ansJson);
         ansloaded = true;
-    }, false)
+    }, false);
 
 
     w(function() {
@@ -97,7 +96,7 @@ function be(levelnum) {
                 cl("apriframe", "cJTVkM").length == 0 &&
                 cl("apriframe", "bcYkMR").length == 0
             ) {
-                cl("apriframe", "iJeaEf")[0].click()
+                cl("apriframe", "iJeaEf")[0].click();
             }
         } catch {} finally {}
         return (cl("apriframe", "iUBGfj").length > 0 && ansloaded);
@@ -119,7 +118,7 @@ function be(levelnum) {
                     }
                     return correct;
                 })
-            ].children[0].click()
+            ].children[0].click();
         } else if (cl("apriframe", "cJTVkM").length > 0) {
             q = cl("apriframe", "gaPucC")[0].innerText;
             cl("apriframe", "cJTVkM")[0].value = ansJson[q][0].slice(0, -1);
@@ -140,5 +139,5 @@ function be(levelnum) {
             }
         }
 
-    }, true)
-}
+    }, true);
+};
