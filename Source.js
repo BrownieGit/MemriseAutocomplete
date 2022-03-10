@@ -23,7 +23,7 @@ for (e in lvs) {
 }
 
 
-console.log("Memrise Autocomplete By Cak");
+console.log("Memrise Autocomplete By Brownie");
 
 function be(levelnum) {
 
