@@ -37,18 +37,21 @@ window.be = function(levelnum) {
     document.body.innerHTML += `<div class='acpopup' style='box-sizing:border-box;top:5vh;left:5vw;width:90vw;height:90vh;padding:5vh;'>
     Level progress: <div class='prog'>0%</div></div><div class='acpopup' style='top:4vh;right:5vw;color:white;background-color:red;
     border-color:darkred;z-index:99999;cursor:pointer;' onclick='window.location = window.location'>Close</div><div class='progress' style='
-    position:fixed;z-index:99999;top:10vh;left:25vw;width:60vw;height:15vh;font-size:20px;padding:20px;text-align:center;'>
-    Memrise automation (v1.1) by Brownie<br>
+    position:fixed;z-index:99999;top:10vh;left:30vw;width:60vw;height:15vh;padding:20px;padding-top:10px;text-align:center;'>Memrise automation (v1.1) by Brownie<br>
     Dont click any buttons on the window because it may induce a stroke for the automation <br>
     Click close and reopen bookmarklet to full flower session! <br>
+    For this to work best you need to Click Your Profile Picture > Click Settings > Click Learing and set Words per Session to 20 and turn OFF Audio Tests<br>
+    If the automation cant complete a test, please mannualy do it and it shoudl continue as normal;
     Uncompressed source code at https://github.com/BrownieGit/MemriseAutocomplete </div>
     <iframe class='frame' id='ansiframe' src='` + window.location + levelnum + `/'></iframe><iframe class='frame' style='left:50vw;'
     id='apriframe' src='https://app.memrise.com/aprender/learn?course_id=` + (window.location + "").slice(31, 38) + "&level_index=" 
     + levelnum + "&source_element=level_details_session&source_screen=level_details'></iframe>";
 
     setInterval(function() {
-        if(cl("apriframe", "hXwgbM").length != 0) {
+        if(cl("apriframe", "hXwgbM").length > 0) {
             cl("prog")[0].innerHTML=Math.round(parseInt(cl("apriframe", "hXwgbM")[0].style.width.slice(0,-1)))+"%";
+        } else if (cl("apriframe", "cIrUXA").length > 0) {
+            cl("prog")[0].innerHTML="100%";
         }
     }, 50);
 
