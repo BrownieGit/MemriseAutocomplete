@@ -1,4 +1,4 @@
-var cl = function(a, b) { return (b == undefined ? document.getElementsByClassName(a) : document.getElementById(a).contentDocument.getElementsByClassName(b)); };
+window.cl = function(a, b) { return (b == undefined ? document.getElementsByClassName(a) : document.getElementsByClassName(a)[0].contentDocument.getElementsByClassName(b)); };
 var w = function(condition, onTrue, loop) {
     var wait = setInterval(function() {
         if (condition()) {
@@ -37,14 +37,13 @@ window.be = function(levelnum) {
     document.body.innerHTML += `<div class='acpopup' style='box-sizing:border-box;top:5vh;left:5vw;width:90vw;height:90vh;padding:5vh;'>
     Level progress: <div class='prog'>0%</div></div><div class='acpopup' style='top:4vh;right:5vw;color:white;background-color:red;
     border-color:darkred;z-index:99999;cursor:pointer;' onclick='window.location = window.location'>Close</div><div class='progress' style='
-    position:fixed;z-index:99999;top:10vh;left:30vw;width:60vw;height:15vh;padding:20px;padding-top:10px;text-align:center;'>Memrise automation (v1.1) by Brownie<br>
+    position:fixed;z-index:99999;top:10vh;left:30vw;width:60vw;height:15vh;padding:20px;padding-top:10px;text-align:center;'>Memrise automation (v1.3) by Brownie<br>
     Dont click any buttons on the window because it may induce a stroke for the automation <br>
-    Click close and reopen bookmarklet to full flower session! <br>
-    For this to work best you need to Click Your Profile Picture > Click Settings > Click Learing and set Words per Session to 20 and turn OFF Audio Tests<br>
+    Click close and reopen bookmarklet to full flower session! <br><b>
+    For this to work best you need to Click Your Profile Picture > Click Settings > Click Learing and set Words per Session to 20 and turn OFF Audio Tests and Tapping Tests</b><br>
     If the automation cant complete a test, please mannualy do it and it shoudl continue as normal;
     Uncompressed source code at https://github.com/BrownieGit/MemriseAutocomplete </div>
-    <iframe class='frame' id='ansiframe' src='` + window.location + levelnum + `/'></iframe><iframe class='frame' style='left:50vw;'
-    id='apriframe' src='https://app.memrise.com/aprender/learn?course_id=` + (window.location + "").slice(31, 38) + "&level_index=" 
+    <iframe class='frame ansiframe' src='` + window.location + levelnum + `/'></iframe><iframe class='frame apriframe' style='left:50vw;' src='https://app.memrise.com/aprender/learn?course_id=` + (window.location + "").slice(31, 38) + "&level_index=" 
     + levelnum + "&source_element=level_details_session&source_screen=level_details'></iframe>";
 
     setInterval(function() {
@@ -99,10 +98,13 @@ window.be = function(levelnum) {
                 cl("apriframe", "cJTVkM").length == 0 &&
                 cl("apriframe", "bcYkMR").length == 0
             ) {
-                cl("apriframe", "iJeaEf")[0].click();
+                cl("apriframe", "lisdcq")[0].click();
             }
-        } catch {} finally {}
-        return (cl("apriframe", "iUBGfj").length > 0 && ansloaded);
+        }catch{}
+        try{
+            cl("apriframe", "eydiph")[0].click();
+        }catch{}
+        return (cl("apriframe", "cJfsMF").length > 0 && ansloaded);
     }, function() {
         if (cl("apriframe", "cwPimx").length != 0) {
 
