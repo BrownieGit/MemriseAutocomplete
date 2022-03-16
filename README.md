@@ -1,4 +1,4 @@
-# MemriseAutocomplete
+# MemriseAutocomplete CURRENTLY BROKEN WORKING ON FIX CHECK AT LIKE 8:00 OR SMTH
 does your memrise when you dont have the bother
 
 run as a bookmarklet or in console - Paste this as a Bookmark into chrome and run on the memrise course you are using it on
