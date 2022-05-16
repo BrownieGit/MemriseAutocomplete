@@ -1,4 +1,4 @@
-# MemriseAutocomplete FIXED V1.4!
+# MemriseAutocomplete FIXED V1.4! (16/05/2022)
 does your memrise when you dont have the bother
 
 run as a bookmarklet or in console - Paste this as a Bookmark into chrome and run on the memrise course you are using it on
