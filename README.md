@@ -1,4 +1,4 @@
-# MemriseAutocomplete BROKEN FIX CPOMGIN!
+# MemriseAutocomplete FIXED V1.4!
 does your memrise when you dont have the bother
 
 run as a bookmarklet or in console - Paste this as a Bookmark into chrome and run on the memrise course you are using it on
@@ -12,3 +12,4 @@ Changelog:
   V1.1: Added Ui
   V1.2: Tiny text change
   V1.3: Fixed after break and now super fast
+  V1.4: Ultimate Fix - Should now no longer break (at least as often as it did) - Can check for updates automatically
