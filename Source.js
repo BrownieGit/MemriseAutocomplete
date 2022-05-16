@@ -1,78 +1,139 @@
-window.cl = function(a, b) { return (b == undefined ? document.getElementsByClassName(a) : document.getElementsByClassName(a)[0].contentDocument.getElementsByClassName(b)); };
-var w = function(condition, onTrue, loop) {
-    var wait = setInterval(function() {
+console.log("Memrise Autocomplete By Brownie");
+
+//Function definitions
+
+function gElemsByClass(a, b) /*Can take 1 or 2 args, if 2, arg 1 is the iframe*/ { return (b == undefined ? document.getElementsByClassName(a) : document.getElementsByClassName(a)[0].contentDocument.getElementsByClassName(b)); };
+
+function gElemsBySelector(a, b) { return (b == undefined ? document.querySelectorAll(a) : document.getElementsByClassName(a)[0].contentDocument.querySelectorAll(b)); }
+
+function tryF(func) { try { func() } catch (e) {} };
+
+var waitTilTrue = function(condition, onTrue) {
+    wait = setInterval(function() {
         if (condition()) {
             setTimeout(onTrue, 100);
-            if (!loop) {
-                clearInterval(wait);
-            }
         }
     }, 10);
 };
+infoBox = function(content) {
+    document.body.innerHTML += `<div class="acpopup infobox"><div style="right:1vw;bottom:-3vw;" class="acpopup closebutt" onclick="this.parentElement.remove()">Close</div><div>${content}</div></div>`;
+}
 
-document.body.innerHTML += `<style>.prog{font-size:100px;margin-top:50px;}.frame{border:0;z-index:99999;position:fixed;top:35vh;left:5vw;width:45vw;height:60vh;} .acpopup {z-index:9999;background-color:white;font-size:17px;position:fixed;
-    font-family:Monospace;border:solid lightgray 5px;padding:10px;}body.levels .levels .level:hover{background-color:lightblue;}</style><div class='acpopup selectp' 
-    style='top:10px;left:10px;'>Select set to complete (click):</div>`;
+//Inject stylesheet 
+document.body.innerHTML += `<style>.infobox{width:50vw;height:min-content;top:50%;left:50%;transform:translate(-50%,-50%);}.prog{font-size:100px;margin-top:50px;}
+    .frame{border:0;z-index:99999;position:fixed;top:35vh;left:5vw;width:45vw;height:60vh;}.acpopup {z-index:9999;background-color:white;font-size:17px;position:fixed;
+    font-family:Monospace;border:solid lightgray 5px;padding:10px;}.closebutt{color:white;background-color:red;border-color:darkred;z-index:99999;cursor:pointer;opacity:1;}
+    .closebutt:hover{color:white;background-color:#FFA0A0;}</style></style><style class="levelhighlight">body.levels .levels .level:hover{background-color:lightblue;}</style>`;
 
-var lvs = cl("level");
+//Checking version
+dontCheckVer = false; //If enabled, it will skip checking for a new version every time the script is run. - Useful for hiding if it gets detected.
+ver = "v1.4"
+
+//Get https://raw.githubusercontent.com/BrownieGit/MemriseAutocomplete/main/ver.txt and check if it's newer than the current version.
+req = new XMLHttpRequest();
+req.open("GET", "https://raw.githubusercontent.com/BrownieGit/MemriseAutocomplete/main/ver.txt", true);
+req.onreadystatechange = function() {
+    if (req.readyState != 4) return;
+    if (req.status != 200) return;
+    recVer = req.responseText.trim();
+    console.log("Version check: '" + recVer + "' (Current version: '" + ver + "')");
+    if (recVer != ver) {
+        infoBox("A new version of Memrise Autocomplete is available!\n\nCurrent version: " + ver +
+            "\nNew version: " + req.responseText + "\n\nPlease visit the script's GitHub page (https://github.com/BrownieGit/MemriseAutocomplete) to download the new version.");
+    }
+};
+if (!dontCheckVer) req.send();
+
+//Elem Definitions - Done here to save size of script after minification and easier to change
+
+progBar = "[data-testid=progressBar-0]";
+
+typingTest = "[data-testid=typing-response-input]";
+
+testRootElem = "[data-testid=testLearnableCard]";
+
+nextIcon = "[data-testid=chevronRight]";
+completedNextIcon = "[data-testid=tick]";
+questionIcon = "[data-testid=question]";
+
+endOfSession = "[data-testid=endOfSession]";
+
+//Frame Definitions
+
+apriframe = "apriframe";
+ansiframe = "ansiframe";
+
+//Misc Class names
+
+text = "text-text";
+prog = "prog";
+
+//Properties
+
+len = "length";
+ch = "children";
+
+//Inject select box
+document.body.innerHTML += `<div class='acpopup selectp' 
+style='top:10px;left:10px;'>Select set to complete (click):</div>`;
+
+lvs = gElemsByClass("level");
 for (e in lvs) {
     try {
         lvs[e].removeAttribute("href");
-        lvs[e].setAttribute("onclick", "be(" + (parseInt(e) + 1) + ")");
+        lvs[e].setAttribute("onclick", "init(" + (parseInt(e) + 1) + ")");
     } catch {}
 }
 
+window.init = function(levelnum) {
 
-console.log("Memrise Autocomplete By Brownie");
-
-window.be = function(levelnum) {
-
-    for (e in lvs) {
+    for (e in lvs) { //Stops all levels from being highlighted and clickable
         try {
             lvs[e].removeAttribute("onclick");
+            gElemsByClass("levelhighlight").remove();
         } catch {}
     }
 
-    cl("selectp")[0].style.display="none";
+    gElemsByClass("selectp")[0].remove();
     document.body.innerHTML += `<div class='acpopup' style='box-sizing:border-box;top:5vh;left:5vw;width:90vw;height:90vh;padding:5vh;'>
-    Level progress: <div class='prog'>0%</div></div><div class='acpopup' style='top:4vh;right:5vw;color:white;background-color:red;
-    border-color:darkred;z-index:99999;cursor:pointer;' onclick='window.location = window.location'>Close</div><div class='progress' style='
-    position:fixed;z-index:99999;top:10vh;left:30vw;width:60vw;height:15vh;padding:20px;padding-top:10px;text-align:center;'>Memrise automation (v1.3) by Brownie<br>
+    Level progress: <div class='prog'>0%</div></div><div class='acpopup closebutt' style='top:4vh;right:5vw;' onclick='window.location=window.location'>Close</div><div class='progress' style='
+    position:fixed;z-index:99999;top:10vh;left:30vw;width:60vw;height:15vh;padding:20px;padding-top:10px;text-align:center;'>Memrise automation (` + ver + `) by Brownie<br>
     Dont click any buttons on the window because it may induce a stroke for the automation <br>
     Click close and reopen bookmarklet to full flower session! <br><b>
     For this to work best you need to Click Your Profile Picture > Click Settings > Click Learing and set Words per Session to 20 and turn OFF Audio Tests and Tapping Tests</b><br>
-    If the automation cant complete a test, please mannualy do it and it shoudl continue as normal;
+    If the automation cant complete a test, please mannualy do it and it should continue as normal for other words. <br>
     Uncompressed source code at https://github.com/BrownieGit/MemriseAutocomplete </div>
-    <iframe class='frame ansiframe' src='` + window.location + levelnum + `/'></iframe><iframe class='frame apriframe' style='left:50vw;' src='https://app.memrise.com/aprender/learn?course_id=` + (window.location + "").slice(31, 38) + "&level_index=" 
-    + levelnum + "&source_element=level_details_session&source_screen=level_details'></iframe>";
+    <iframe class='frame ansiframe' src='` + window.location + levelnum + `/'></iframe><iframe class='frame apriframe' style='left:50vw;' src='https://app.memrise.com/aprender/learn?course_id=` + (window.location + "").slice(31, 38) + "&level_index=" +
+        levelnum + "&source_element=level_details_session&source_screen=level_details'></iframe>";
 
-    setInterval(function() {
-        if(cl("apriframe", "hXwgbM").length > 0) {
-            cl("prog")[0].innerHTML=Math.round(parseInt(cl("apriframe", "hXwgbM")[0].style.width.slice(0,-1)))+"%";
-        } else if (cl("apriframe", "cIrUXA").length > 0) {
-            cl("prog")[0].innerHTML="100%";
+    setInterval(function() { //Updating progress bar
+        progElem = gElemsBySelector(apriframe, progBar);
+        if (progElem[len] > 0) {
+            gElemsByClass(prog)[0].innerHTML = Math.round(parseInt(progElem[0].style.width.slice(0, -1))) + "%";
+        } else if (gElemsBySelector(apriframe, endOfSession)[len] > 0) { //If the test is done
+            gElemsByClass(prog)[0].innerHTML = "100%";
         }
     }, 50);
 
     ansloaded = false;
 
-    w(function() {
-        return (cl("ansiframe", "text-text").length > 0);
+    waitTilTrue(function() {
+        return (gElemsByClass(ansiframe, text)[len] > 0 && !ansloaded); //Waits until the answer page is loaded
     }, function() {
         ansJson = {};
 
-        ansElems = cl("ansiframe", "text-text");
-        for (e in ansElems) {
+        ansElems = gElemsByClass(ansiframe, text);
+        for (e in ansElems) { //Parsing into two way json array
             a = [];
-            for (c in ansElems[e].children) {
-                try {
-                    if (ansElems[e].children[c].classList.contains("col")) {
-                        a.push(ansElems[e].children[c].innerText);
+            for (c in ansElems[e][ch]) {
+                tryF(() => {
+                    if (ansElems[e][ch][c].classList.contains("col")) {
+                        a.push(ansElems[e][ch][c].innerText);
                     }
-                } catch {}
+                });
             }
 
-            if (a.length == 2) {
+            if (a[len] == 2) {
                 if (ansJson[a[0]] == undefined) {
                     ansJson[a[0]] = [a[1]];
                 } else {
@@ -86,63 +147,58 @@ window.be = function(levelnum) {
                 }
             }
         }
-        console.log("Loaded answers:");
+        console.log("Loaded answers:"); //Logging answers
         console.log(ansJson);
         ansloaded = true;
-    }, false);
+    });
 
 
-    w(function() {
-        try {
-            if (
-                cl("apriframe", "cJTVkM").length == 0 &&
-                cl("apriframe", "bcYkMR").length == 0
-            ) {
-                cl("apriframe", "lisdcq")[0].click();
-            }
-        }catch{}
-        try{
-            cl("apriframe", "eydiph")[0].click();
-        }catch{}
-        return (cl("apriframe", "cJfsMF").length > 0 && ansloaded);
+    waitTilTrue(function() {
+        tryF(() => gElemsBySelector(apriframe, nextIcon)[0].parentElement.click()); //Auto click if it has the "Next" button - Only auto-appears when it gives definition
+        tryF(() => gElemsBySelector(apriframe, completedNextIcon)[0].parentElement.click()); //Auto click the green "Next" button - Speeds up the process dramatically
+        return (gElemsBySelector(apriframe, questionIcon)[len] > 0 && ansloaded); //If it has a "I don't know button" (means there is a test) and the answer page is loaded
     }, function() {
-        if (cl("apriframe", "cwPimx").length != 0) {
+        que = gElemsBySelector(apriframe, testRootElem)[0][ch][1][ch][0][ch][0].innerText; //Term 
+        if (gElemsBySelector(apriframe, typingTest)[len] > 0) {
+            gElemsBySelector(apriframe, typingTest)[0].value = ansJson[que][0].slice(0, -1);
 
-            u = cl("apriframe", "cwPimx")[0].innerText.split("\n");
-            if (u.length == 8) {
-                ans = [u[1], u[3], u[5], u[7], ];
-            } else { ans = u; }
-            q = cl("apriframe", "gaPucC")[0].innerText;
+            buttons = gElemsBySelector(apriframe, testRootElem)[0][ch][1][ch][0][ch][1][ch][2]; //Individual letter buttons
 
-            cl("apriframe", "cwPimx")[0].children[
-                ans.findIndex(function(e) {
-                    correct = false;
-                    correctarr = ansJson[q];
-                    for (i in correctarr) {
-                        if (e == correctarr[i]) { correct = true; }
-                    }
-                    return correct;
-                })
-            ].children[0].click();
-        } else if (cl("apriframe", "cJTVkM").length > 0) {
-            q = cl("apriframe", "gaPucC")[0].innerText;
-            cl("apriframe", "cJTVkM")[0].value = ansJson[q][0].slice(0, -1);
-
-            ans = cl("apriframe", "guQYfh")[0].innerText.split("\n");
-            cl("apriframe", "guQYfh")[0].children[
-                ans.findIndex(function(e) { return e == ansJson[q][0].slice(-1); })
+            ans = buttons.innerText.split("\n");
+            buttons[ch][
+                ans.findIndex(function(e) { return e == ansJson[que][0].slice(-1); })
             ].click();
-        } else if (cl("apriframe", "bDRJye").length > 0) {
-            q = cl("apriframe", "gaPucC")[0].innerText;
-            ans = cl("apriframe", "jyOuMz")[0].innerText.split("\n");
-            asl = ansJson[q][0].split(" ");
-            console.log(asl);
-            for (i in asl) {
-                cl("apriframe", "jyOuMz")[0].children[
-                    ans.findIndex(function(e) { return e == asl[i]; })
-                ].click();
-            }
-        }
+        } else { //Must be multiple choice test (If configured correctly)
+            givenAnsElem = gElemsBySelector(apriframe, testRootElem)[0][ch][1][ch][0][ch][1]
 
-    }, true);
+            ans = givenAnsElem.innerText.split("\n"); //lazy way to get the answers
+
+            if (ans[len] == 8) {
+                ans = [ans[1], ans[3], ans[5], ans[7], ]; //Gets the odd ones which are the answers if it included numbers
+            }
+
+            correctarr = ansJson[que];
+
+            givenAnsElem[ch][
+                ans.findIndex(function(e) {
+                    for (i in correctarr) {
+                        if (e == correctarr[i]) { return true; }
+                    }
+                    return false;
+                })
+            ][ch][0].click();
+        }
+        /* else if (gElemsByClass(apriframe, "bDRJye")[len] > 0) { //(old) Tapping test but probs wont fix it because it is a pain to fix these (and its not even needed)
+                    q = gElemsByClass(apriframe, "gaPucC")[0].innerText;
+                    ans = gElemsByClass(apriframe, "jyOuMz")[0].innerText.split("\n");
+                    asl = ansJson[q][0].split(" ");
+                    console.log(asl);
+                    for (i in asl) {
+                        gElemsByClass(apriframe, "jyOuMz")[0][ch][
+                            ans.findIndex(function(e) { return e == asl[i]; })
+                        ].click();
+                    }
+                }*/
+
+    });
 };
